@@ -1,6 +1,6 @@
 {
-  "name": "getphoto/knp-menu-extended",
-  "description": "knp-menu Extension",
+  "name": "GetPhoto/KnpMenuExtension",
+  "description": "KnpMenu Extension",
   "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
@@ -9,12 +9,15 @@
       "email": "gustav.wellnerbou@fotograf.de"
     }
   ],
+  "require": {
+    "knplabs/knp-menu": "^2.1"
+  },
   "require-dev": {
     "phpunit/phpunit": "~4.0"
   },
   "autoload": {
     "psr-4": {
-      "GetPhoto\\MenuBuilder\\": "src"
+      "GetPhoto\\KnpMenuExtension\\": "src"
     }
   }
 }
