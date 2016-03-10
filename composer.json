@@ -1,6 +1,6 @@
 {
-  "name": "GetPhoto/MenuBuilder",
-  "description": "A small and versatile Library that helps building navigation menus",
+  "name": "GetPhoto/knp-menu-extended",
+  "description": "knp-menu Extension",
   "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
