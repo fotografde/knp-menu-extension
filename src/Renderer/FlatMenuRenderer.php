@@ -36,6 +36,8 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 			'clear_matcher' => true,
 			'leaf_class' => null,
 			'branch_class' => null,
+			'icon_base_path' => null,
+			'icon_ext' => null,
 		), $defaultOptions);
 
 		parent::__construct($charset);
@@ -52,6 +54,16 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 		}
 
 		return $html;
+	}
+
+	protected function getExtendedOptions(ItemInterface $item) {
+		$options = [];
+		foreach($item->getExtras() as $key => $value) {
+			if(substr($key, 0, 4) === 'ext:') {
+				$options[substr($key, 4)] = $value;
+			}
+		}
+		return $options;
 	}
 
 	protected function renderList(ItemInterface $item, array $attributes, array $options)
@@ -123,6 +135,8 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 			return '';
 		}
 
+		$extendedOtions = $this->getExtendedOptions($item);
+
 		// create an array than can be imploded as a class list
 		$class = (array) $item->getAttribute('class');
 
@@ -155,6 +169,11 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 
 		// opening li tag
 		$html = $this->format('<li'.$this->renderHtmlAttributes($attributes).'>', 'li', $item->getLevel(), $options);
+
+		// icon
+		if(!empty($extendedOtions['icon'])){
+			$html .= $this->format('<img src="'.$options['icon_base_path'].$extendedOtions['icon'].$options['icon_ext'].'" />', 'img', $item->getLevel(), $options);
+		}
 
 		// render the text/link inside the li tag
 		//$html .= $this->format($item->getUri() ? $item->renderLink() : $item->renderLabel(), 'link', $item->getLevel());
@@ -239,6 +258,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 		switch ($type) {
 			case 'ul':
 			case 'link':
+			case 'img':
 				$spacing = $level * 4;
 				break;
 
