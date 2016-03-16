@@ -59,24 +59,26 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 	public function renderBacklink(ItemInterface $item, $options = array()) {
 		$options = array_merge($this->defaultOptions, $options);
 
+
 		if(!empty($options['label'])) {
-			$item->setLabel($options['label']);
+			$item->getParent()->setLabel($options['label']);
 		}
 
 		if(!empty($options['icon'])) {
-			$item->setExtra('ext:icon', $options['icon']);
+			$item->getParent()->setExtra('ext:icon', $options['icon']);
 		}
 
-		$html = $this->format(
-			'<ul' . $this->renderHtmlAttributes($item->getChildrenAttributes()) . '>',
-			'ul',
-			$item->getLevel(),
-			$options
-		);
+		if(!empty($options['headline'])) {
+			$item->setExtra('ext:headline', $options['headline']);
+		}
 
-		$html .= $this->renderItem($item, $options);
+		$item->setLabelAttribute('class', 'cf-headline');
 
-		$html .= $this->format('</ul>', 'ul', $item->getLevel(), $options);
+		$item->getParent()->setLinkAttribute('class', 'cf-back-link');
+
+		$html = $this->renderLink($item->getParent(), $options);
+
+		$html .= $this->renderHeadline($item, $options);
 
 		if ($options['clear_matcher']) {
 			$this->matcher->clear();
@@ -254,6 +256,20 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 			$this->escape($item->getUri()),
 			$this->renderHtmlAttributes($item->getLinkAttributes()),
 			$this->renderLabel($item, $options)
+		);
+	}
+
+	protected function renderHeadline(ItemInterface $item, array $options) {
+		$label = $item->getLabel();
+
+		if($item->getExtra('ext:headline')) {
+			$label = $item->getExtra('ext:headline');
+		}
+
+		return sprintf(
+			'<h3%s>%s</h3>',
+			$this->renderHtmlAttributes($item->getLabelAttributes()),
+			$label
 		);
 	}
 
