@@ -10,41 +10,41 @@ use Knp\Menu\Renderer\RendererInterface;
 /**
  * Renders MenuItem tree as unordered list
  */
-class FlatMenuRenderer extends Renderer implements RendererInterface
-{
+class FlatMenuRenderer extends Renderer implements RendererInterface {
 	protected $matcher;
 	protected $defaultOptions;
 
 	/**
 	 * @param MatcherInterface $matcher
-	 * @param array            $defaultOptions
-	 * @param string           $charset
+	 * @param array $defaultOptions
+	 * @param string $charset
 	 */
-	public function __construct(MatcherInterface $matcher, array $defaultOptions = array(), $charset = null)
-	{
+	public function __construct(MatcherInterface $matcher, array $defaultOptions = array(), $charset = null) {
 		$this->matcher = $matcher;
-		$this->defaultOptions = array_merge(array(
-			'depth' => null,
-			'matchingDepth' => null,
-			'currentAsLink' => true,
-			'currentClass' => 'current',
-			'ancestorClass' => 'current_ancestor',
-			'firstClass' => 'first',
-			'lastClass' => 'last',
-			'compressed' => false,
-			'allow_safe_labels' => false,
-			'clear_matcher' => true,
-			'leaf_class' => null,
-			'branch_class' => null,
-			'icon_base_path' => null,
-			'icon_ext' => null,
-		), $defaultOptions);
+		$this->defaultOptions = array_merge(
+			array(
+				'depth' => null,
+				'matchingDepth' => null,
+				'currentAsLink' => true,
+				'currentClass' => 'current',
+				'ancestorClass' => 'current_ancestor',
+				'firstClass' => 'first',
+				'lastClass' => 'last',
+				'compressed' => false,
+				'allow_safe_labels' => false,
+				'clear_matcher' => true,
+				'leaf_class' => null,
+				'branch_class' => null,
+				'icon_base_path' => null,
+				'icon_ext' => null,
+			),
+			$defaultOptions
+		);
 
 		parent::__construct($charset);
 	}
 
-	public function render(ItemInterface $item, array $options = array())
-	{
+	public function render(ItemInterface $item, array $options = array()) {
 		$options = array_merge($this->defaultOptions, $options);
 
 		$html = $this->renderList($item, $item->getChildrenAttributes(), $options);
@@ -56,18 +56,46 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 		return $html;
 	}
 
+	public function renderBacklink(ItemInterface $item, $options = array()) {
+		$options = array_merge($this->defaultOptions, $options);
+
+		if(!empty($options['label'])) {
+			$item->setLabel($options['label']);
+		}
+
+		if(!empty($options['icon'])) {
+			$item->setExtra('ext:icon', $options['icon']);
+		}
+
+		$html = $this->format(
+			'<ul' . $this->renderHtmlAttributes($item->getChildrenAttributes()) . '>',
+			'ul',
+			$item->getLevel(),
+			$options
+		);
+
+		$html .= $this->renderItem($item, $options);
+
+		$html .= $this->format('</ul>', 'ul', $item->getLevel(), $options);
+
+		if ($options['clear_matcher']) {
+			$this->matcher->clear();
+		}
+
+		return $html;
+	}
+
 	protected function getExtendedOptions(ItemInterface $item) {
 		$options = [];
-		foreach($item->getExtras() as $key => $value) {
-			if(substr($key, 0, 4) === 'ext:') {
+		foreach ($item->getExtras() as $key => $value) {
+			if (substr($key, 0, 4) === 'ext:') {
 				$options[substr($key, 4)] = $value;
 			}
 		}
 		return $options;
 	}
 
-	protected function renderList(ItemInterface $item, array $attributes, array $options)
-	{
+	protected function renderList(ItemInterface $item, array $attributes, array $options) {
 		/**
 		 * Return an empty string if any of the following are true:
 		 *   a) The menu has no children eligible to be displayed
@@ -78,7 +106,12 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 			return '';
 		}
 
-		$html = $this->format('<ul'.$this->renderHtmlAttributes($attributes).'>', 'ul', $item->getLevel(), $options);
+		$html = $this->format(
+			'<ul' . $this->renderHtmlAttributes($attributes) . '>',
+			'ul',
+			$item->getLevel(),
+			$options
+		);
 		$html .= $this->renderChildren($item, $options);
 		$html .= $this->format('</ul>', 'ul', $item->getLevel(), $options);
 
@@ -94,12 +127,11 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 	 * This method updates the depth for the children.
 	 *
 	 * @param ItemInterface $item
-	 * @param array         $options The options to render the item.
+	 * @param array $options The options to render the item.
 	 *
 	 * @return string
 	 */
-	protected function renderChildren(ItemInterface $item, array $options)
-	{
+	protected function renderChildren(ItemInterface $item, array $options) {
 		// render children with a depth - 1
 		if (null !== $options['depth']) {
 			$options['depth'] = $options['depth'] - 1;
@@ -124,12 +156,11 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 	 * own nested ul tag if this menu item has children
 	 *
 	 * @param ItemInterface $item
-	 * @param array         $options The options to render the item
+	 * @param array $options The options to render the item
 	 *
 	 * @return string
 	 */
-	protected function renderItem(ItemInterface $item, array $options)
-	{
+	protected function renderItem(ItemInterface $item, array $options) {
 		// if we don't have access or this item is marked to not be shown
 		if (!$item->isDisplayed()) {
 			return '';
@@ -138,7 +169,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 		$extendedOtions = $this->getExtendedOptions($item);
 
 		// create an array than can be imploded as a class list
-		$class = (array) $item->getAttribute('class');
+		$class = (array)$item->getAttribute('class');
 
 		if ($this->matcher->isCurrent($item)) {
 			$class[] = $options['currentClass'];
@@ -168,20 +199,20 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 		}
 
 		// opening li tag
-		$html = $this->format('<li'.$this->renderHtmlAttributes($attributes).'>', 'li', $item->getLevel(), $options);
-
-		// icon
-		if(!empty($extendedOtions['icon'])){
-			$html .= $this->format('<img src="'.$options['icon_base_path'].$extendedOtions['icon'].$options['icon_ext'].'" />', 'img', $item->getLevel(), $options);
-		}
+		$html = $this->format(
+			'<li' . $this->renderHtmlAttributes($attributes) . '>',
+			'li',
+			$item->getLevel(),
+			$options
+		);
 
 		// render the text/link inside the li tag
 		//$html .= $this->format($item->getUri() ? $item->renderLink() : $item->renderLabel(), 'link', $item->getLevel());
 		$html .= $this->renderLink($item, $options);
 
 		// renders the embedded ul
-		$childrenClass = (array) $item->getChildrenAttribute('class');
-		$childrenClass[] = 'menu_level_'.$item->getLevel();
+		$childrenClass = (array)$item->getChildrenAttribute('class');
+		$childrenClass[] = 'menu_level_' . $item->getLevel();
 
 		$childrenAttributes = $item->getChildrenAttributes();
 		$childrenAttributes['class'] = implode(' ', $childrenClass);
@@ -202,13 +233,12 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 	 * the current item and if the text has to be rendered
 	 * as a link or not.
 	 *
-	 * @param ItemInterface $item    The item to render the link or label for
-	 * @param array         $options The options to render the item
+	 * @param ItemInterface $item The item to render the link or label for
+	 * @param array $options The options to render the item
 	 *
 	 * @return string
 	 */
-	protected function renderLink(ItemInterface $item, array $options = array())
-	{
+	protected function renderLink(ItemInterface $item, array $options = array()) {
 		if ($item->getUri() && (!$item->isCurrent() || $options['currentAsLink'])) {
 			$text = $this->renderLinkElement($item, $options);
 		} else {
@@ -218,23 +248,41 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 		return $this->format($text, 'link', $item->getLevel(), $options);
 	}
 
-	protected function renderLinkElement(ItemInterface $item, array $options)
-	{
-		return sprintf('<a href="%s"%s>%s</a>', $this->escape($item->getUri()), $this->renderHtmlAttributes($item->getLinkAttributes()), $this->renderLabel($item, $options));
+	protected function renderLinkElement(ItemInterface $item, array $options) {
+		return sprintf(
+			'<a href="%s"%s>%s</a>',
+			$this->escape($item->getUri()),
+			$this->renderHtmlAttributes($item->getLinkAttributes()),
+			$this->renderLabel($item, $options)
+		);
 	}
 
-	protected function renderSpanElement(ItemInterface $item, array $options)
-	{
-		return sprintf('<span%s>%s</span>', $this->renderHtmlAttributes($item->getLabelAttributes()), $this->renderLabel($item, $options));
+	protected function renderSpanElement(ItemInterface $item, array $options) {
+		return sprintf(
+			'<span%s>%s</span>',
+			$this->renderHtmlAttributes($item->getLabelAttributes()),
+			$this->renderLabel($item, $options)
+		);
 	}
 
-	protected function renderLabel(ItemInterface $item, array $options)
-	{
-		if ($options['allow_safe_labels'] && $item->getExtra('safe_label', false)) {
-			return $item->getLabel();
+	protected function renderLabel(ItemInterface $item, array $options) {
+		$icon = '';
+		$extendedOtions = $this->getExtendedOptions($item);
+		// icon
+		if (!empty($extendedOtions['icon'])) {
+			$icon = $this->format(
+				'<img src="' . $options['icon_base_path'] . $extendedOtions['icon'] . $options['icon_ext'] . '" />',
+				'img',
+				$item->getLevel(),
+				$options
+			);
 		}
 
-		return $this->escape($item->getLabel());
+		if ($options['allow_safe_labels'] && $item->getExtra('safe_label', false)) {
+			return $icon . $item->getLabel();
+		}
+
+		return $icon . $this->escape($item->getLabel());
 	}
 
 	/**
@@ -242,15 +290,14 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 	 * spacing and line-breaking so that the particular thing being rendered
 	 * makes up its part in a fully-rendered and spaced menu.
 	 *
-	 * @param string  $html    The html to render in an (un)formatted way
-	 * @param string  $type    The type [ul,link,li] of thing being rendered
+	 * @param string $html The html to render in an (un)formatted way
+	 * @param string $type The type [ul,link,li] of thing being rendered
 	 * @param integer $level
-	 * @param array   $options
+	 * @param array $options
 	 *
 	 * @return string
 	 */
-	protected function format($html, $type, $level, array $options)
-	{
+	protected function format($html, $type, $level, array $options) {
 		if ($options['compressed']) {
 			return $html;
 		}
@@ -267,6 +314,6 @@ class FlatMenuRenderer extends Renderer implements RendererInterface
 				break;
 		}
 
-		return str_repeat(' ', $spacing).$html."\n";
+		return str_repeat(' ', $spacing) . $html . "\n";
 	}
 }

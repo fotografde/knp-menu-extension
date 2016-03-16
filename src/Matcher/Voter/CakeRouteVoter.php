@@ -28,24 +28,27 @@ class CakeRouteVoter implements VoterInterface {
 			return true;
 		}
 
-		return null;
+		if(strpos($item->getUri(), '*') !== false) {
+			$route = array_filter(explode('/', $this->route));
+			$uri = array_filter(explode('/', $item->getUri()));
 
-		$route = array_filter(explode('/', $this->route));
-		$uri = array_filter(explode('/', $item->getUri()));
+			foreach ($uri as $key => $part) {
+				if (empty($route[$key])) {
+					return null;
+				}
+				if ($part === '*') {
+					continue;
+				}
 
-		foreach ($uri as $key => $part) {
-			if (empty($route[$key])) {
-				return null;
-			}
-			if ($part === '*') {
-				continue;
+				if ($part !== $route[$key]) {
+					return null;
+				}
 			}
 
-			if ($part !== $route[$key]) {
-				return null;
-			}
+			return true;
 		}
 
-		return true;
+		return null;
+
 	}
 }

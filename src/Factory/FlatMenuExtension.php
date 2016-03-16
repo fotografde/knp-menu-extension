@@ -37,6 +37,12 @@ class FlatMenuExtension implements ExtensionInterface {
 				$item->setExtra('ext:'.$param, $options[$param]);
 			}
 		}
+
+		if(!empty($options['subpages_uri'])) {
+			foreach($options['subpages_uri'] as $uri) {
+				$item->addChild($uri, ['uri' => $uri])->setDisplay(false)->setExtra('navbar_backlink', true);
+			}
+		}
 	}
 
 }
