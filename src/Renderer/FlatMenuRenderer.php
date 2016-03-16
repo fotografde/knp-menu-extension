@@ -59,6 +59,10 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 	public function renderBacklink(ItemInterface $item, $options = array()) {
 		$options = array_merge($this->defaultOptions, $options);
 
+		if(empty($options['headline'])) {
+			return null;
+		}
+
 
 		if(!empty($options['label'])) {
 			$item->getParent()->setLabel($options['label']);
