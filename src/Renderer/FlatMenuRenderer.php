@@ -72,7 +72,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 			$item->setExtra('ext:headline', $options['headline']);
 		}
 
-		$item->setLabelAttribute('class', 'cf-headline');
+		$item->setLabelAttribute('class', 'cf-back-link btn btn-default');
 
 		$item->getParent()->setLinkAttribute('class', 'cf-back-link');
 
