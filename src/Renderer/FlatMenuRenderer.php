@@ -267,7 +267,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		}
 
 		return sprintf(
-			'<h3%s>%s</h3>',
+			'<h1%s>%s</h1>',
 			$this->renderHtmlAttributes($item->getLabelAttributes()),
 			$label
 		);
