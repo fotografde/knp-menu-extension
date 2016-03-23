@@ -59,20 +59,19 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 	public function renderBacklink(ItemInterface $item, $options = array()) {
 		$options = array_merge($this->defaultOptions, $options);
 
-		if(empty($options['headline'])) {
+		if (empty($options['headline'])) {
 			return null;
 		}
 
-
-		if(!empty($options['label'])) {
+		if (!empty($options['label'])) {
 			$item->getParent()->setLabel($options['label']);
 		}
 
-		if(!empty($options['icon'])) {
+		if (!empty($options['icon'])) {
 			$item->getParent()->setExtra('ext:icon', $options['icon']);
 		}
 
-		if(!empty($options['headline'])) {
+		if (!empty($options['headline'])) {
 			$item->setExtra('ext:headline', $options['headline']);
 		}
 
@@ -93,7 +92,8 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 
 	protected function getExtendedOptions(ItemInterface $item) {
 		$options = [];
-		foreach ($item->getExtras() as $key => $value) {
+		$extras = $item->getExtras();
+		foreach ($extras as $key => $value) {
 			if (substr($key, 0, 4) === 'ext:') {
 				$options[substr($key, 4)] = $value;
 			}
@@ -286,23 +286,32 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 	}
 
 	protected function renderLabel(ItemInterface $item, array $options) {
-		$icon = '';
-		$extendedOtions = $this->getExtendedOptions($item);
+		$label = '';
+		$extendedOptions = $this->getExtendedOptions($item);
 		// icon
-		if (!empty($extendedOtions['icon'])) {
-			$icon = $this->format(
-				'<img src="' . $options['icon_base_path'] . $extendedOtions['icon'] . $options['icon_ext'] . '" />',
+		if (!empty($extendedOptions['icon'])) {
+			$label .= $this->format(
+				'<img src="' . $options['icon_base_path'] . $extendedOptions['icon'] . $options['icon_ext'] . '" />',
 				'img',
 				$item->getLevel(),
 				$options
 			);
 		}
 
-		if ($options['allow_safe_labels'] && $item->getExtra('safe_label', false)) {
-			return $icon . $item->getLabel();
+		if (!empty($extendedOptions['badge'])) {
+			$label .= sprintf(' <span style="margin-left:10px" class="label label-important pull-right">%s</span>',
+				$this->escape($extendedOptions['badge'])
+			);
 		}
 
-		return $icon . $this->escape($item->getLabel());
+		if ($options['allow_safe_labels'] && $item->getExtra('safe_label', false)) {
+			$label .= $item->getLabel();
+		} else {
+			$label .= $this->escape($item->getLabel());
+		}
+
+
+		return $label;
 	}
 
 	/**

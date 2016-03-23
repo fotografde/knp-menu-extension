@@ -25,6 +25,4 @@ class FlatMenuItem extends MenuItem {
 
 		return $child;
 	}
-
-
 }

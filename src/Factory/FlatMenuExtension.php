@@ -30,7 +30,7 @@ class FlatMenuExtension implements ExtensionInterface {
 	public function buildItem(ItemInterface $item, array $options) {
 		// Set extra parameters
 
-		$params = ['icon', 'rate_rights', 'headline', 'hide_navbar'];
+		$params = ['icon', 'rate_rights', 'headline', 'hide_navbar', 'badge'];
 
 		foreach($params as $param) {
 			if(isset($options[$param])) {
