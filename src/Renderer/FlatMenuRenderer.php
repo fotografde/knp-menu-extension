@@ -219,6 +219,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		//$html .= $this->format($item->getUri() ? $item->renderLink() : $item->renderLabel(), 'link', $item->getLevel());
 		$html .= $this->renderLink($item, $options);
 
+
 		// renders the embedded ul
 		$childrenClass = (array)$item->getChildrenAttribute('class');
 		$childrenClass[] = 'menu_level_' . $item->getLevel();
@@ -227,6 +228,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		$childrenAttributes['class'] = implode(' ', $childrenClass);
 
 		$html .= $this->renderList($item, $childrenAttributes, $options);
+
 
 		// closing li tag
 		$html .= $this->format('</li>', 'li', $item->getLevel(), $options);
@@ -255,7 +257,6 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		$display_normal = false;
 		if (!empty($rate_rights)) {
 			//if one of item rate rights is in user rate right, then display item normaly
-			//prd($options['user_rate']);
 			foreach ($rate_rights as $rate_right) {
 				if (isset($options['user_rate'][$rate_right]) && $options['user_rate'][$rate_right] == 1) {
 					$display_normal = true;
@@ -269,11 +270,15 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 				if (!empty($alt_uri)) {
 					$item->setUri($alt_uri);
 				}
+				else if (!empty($this->defaultOptions['default_rate_alt_uri'])) {
+					$item->setUri($this->defaultOptions['default_rate_alt_uri']);
+				}
 				//set item class for css style if its unavailable for rate
 				$item_class = $item->getAttribute('class');
 				if ($item_class != '') $item_class .= ' ';
 				$item_class .= 'rate-unavailable';
 				$item->setAttribute('class',$item_class);
+				$item->setExtra('ext:rate-unavailable', true);
 			}
 		}
 	}
@@ -297,7 +302,6 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		} else {
 			$text = $this->renderSpanElement($item, $options);
 		}
-
 		return $this->format($text, 'link', $item->getLevel(), $options);
 	}
 
@@ -357,6 +361,9 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 			$label .= $this->escape($item->getLabel());
 		}
 
+		if (!empty($extendedOptions['rate-unavailable'])) {
+			$label .= '<i class="'.$this->defaultOptions['rate_unavailable_icon'].' rate-unavailable-icon"></i>';
+		}
 
 		return $label;
 	}
