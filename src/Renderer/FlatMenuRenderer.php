@@ -167,6 +167,9 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 	 * @return string
 	 */
 	protected function renderItem(ItemInterface $item, array $options) {
+		//apply user rights policy to item
+		$this->applyUserRights($item, $options);
+
 		// if we don't have access or this item is marked to not be shown
 		if (!$item->isDisplayed()) {
 			return '';
@@ -229,6 +232,50 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		$html .= $this->format('</li>', 'li', $item->getLevel(), $options);
 
 		return $html;
+	}
+
+	/**
+	 * Apply user rights to an item
+	 * so we can hide and display items differently based on user rights & photographer rates
+	 * Used in renderItem
+	 *
+	 * @author navihtot
+	 * @param ItemInterface $item
+	 * @param array $options The options to render the item
+	 */
+	protected function applyUserRights(ItemInterface &$item, array $options) {
+		$user_rights=$item->getExtra('ext:user_rights');
+		if (!empty($user_rights)) {
+			if (empty(array_intersect($user_rights, $options['user_rights']))) {
+				$item->setDisplay(false);
+			}
+		}
+
+		$rate_rights=$item->getExtra('ext:rate_rights');
+		$display_normal = false;
+		if (!empty($rate_rights)) {
+			//if one of item rate rights is in user rate right, then display item normaly
+			//prd($options['user_rate']);
+			foreach ($rate_rights as $rate_right) {
+				if (isset($options['user_rate'][$rate_right]) && $options['user_rate'][$rate_right] == 1) {
+					$display_normal = true;
+					break;
+				}
+			}
+
+			//if user rate is in required rates for item
+			if (!$display_normal) {
+				$alt_uri = $item->getExtra('ext:rate_alt_uri');
+				if (!empty($alt_uri)) {
+					$item->setUri($alt_uri);
+				}
+				//set item class for css style if its unavailable for rate
+				$item_class = $item->getAttribute('class');
+				if ($item_class != '') $item_class .= ' ';
+				$item_class .= 'rate-unavailable';
+				$item->setAttribute('class',$item_class);
+			}
+		}
 	}
 
 	/**
