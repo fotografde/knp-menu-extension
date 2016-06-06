@@ -167,6 +167,9 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 	 * @return string
 	 */
 	protected function renderItem(ItemInterface $item, array $options) {
+		//apply user rights policy to item
+		$this->applyUserRights($item, $options);
+
 		// if we don't have access or this item is marked to not be shown
 		if (!$item->isDisplayed()) {
 			return '';
@@ -216,6 +219,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		//$html .= $this->format($item->getUri() ? $item->renderLink() : $item->renderLabel(), 'link', $item->getLevel());
 		$html .= $this->renderLink($item, $options);
 
+
 		// renders the embedded ul
 		$childrenClass = (array)$item->getChildrenAttribute('class');
 		$childrenClass[] = 'menu_level_' . $item->getLevel();
@@ -225,10 +229,58 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 
 		$html .= $this->renderList($item, $childrenAttributes, $options);
 
+
 		// closing li tag
 		$html .= $this->format('</li>', 'li', $item->getLevel(), $options);
 
 		return $html;
+	}
+
+	/**
+	 * Apply user rights to an item
+	 * so we can hide and display items differently based on user rights & photographer rates
+	 * Used in renderItem
+	 *
+	 * @author navihtot
+	 * @param ItemInterface $item
+	 * @param array $options The options to render the item
+	 */
+	protected function applyUserRights(ItemInterface &$item, array $options) {
+		$user_rights=$item->getExtra('ext:user_rights');
+		if (!empty($user_rights)) {
+			if (empty(array_intersect($user_rights, $options['user_rights']))) {
+				$item->setDisplay(false);
+			}
+		}
+
+		$rate_rights=$item->getExtra('ext:rate_rights');
+		$display_normal = false;
+		if (!empty($rate_rights)) {
+			//if one of item rate rights is in user rate right, then display item normaly
+			foreach ($rate_rights as $rate_right) {
+				if (isset($options['user_rate'][$rate_right]) && $options['user_rate'][$rate_right] == 1) {
+					$display_normal = true;
+					break;
+				}
+			}
+
+			//if user rate is in required rates for item
+			if (!$display_normal) {
+				$alt_uri = $item->getExtra('ext:rate_alt_uri');
+				if (!empty($alt_uri)) {
+					$item->setUri($alt_uri);
+				}
+				else if (!empty($this->defaultOptions['default_rate_alt_uri'])) {
+					$item->setUri($this->defaultOptions['default_rate_alt_uri']);
+				}
+				//set item class for css style if its unavailable for rate
+				$item_class = $item->getAttribute('class');
+				if ($item_class != '') $item_class .= ' ';
+				$item_class .= 'rate-unavailable';
+				$item->setAttribute('class',$item_class);
+				$item->setExtra('ext:rate-unavailable', true);
+			}
+		}
 	}
 
 	/**
@@ -250,7 +302,6 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		} else {
 			$text = $this->renderSpanElement($item, $options);
 		}
-
 		return $this->format($text, 'link', $item->getLevel(), $options);
 	}
 
@@ -310,6 +361,9 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 			$label .= $this->escape($item->getLabel());
 		}
 
+		if (!empty($extendedOptions['rate-unavailable'])) {
+			$label .= '<i class="'.$this->defaultOptions['rate_unavailable_icon'].' rate-unavailable-icon"></i>';
+		}
 
 		return $label;
 	}
