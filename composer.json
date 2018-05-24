@@ -1,8 +1,9 @@
 {
-  "name": "GetPhoto/KnpMenuExtension",
+  "name": "fotografde/knp-menu-extension",
   "description": "KnpMenu Extension",
   "minimum-stability": "stable",
   "license": "proprietary",
+  "version": "1.0.0"
   "authors": [
     {
       "name": "Gustav Wellner Bou",
