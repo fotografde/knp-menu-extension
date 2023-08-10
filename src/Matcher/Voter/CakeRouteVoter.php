@@ -19,7 +19,7 @@ class CakeRouteVoter implements VoterInterface {
 		$this->route = $route;
 	}
 
-	public function matchItem(ItemInterface $item) {
+	public function matchItem(ItemInterface $item): ?bool {
 		if (null === $this->route || null === $item->getUri()) {
 			return null;
 		}

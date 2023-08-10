@@ -17,7 +17,7 @@ class FlatMenuExtension implements ExtensionInterface {
 	 * @param array $options
 	 * @return array
 	 */
-	public function buildOptions(array $options) {
+	public function buildOptions(array $options): array {
 		// TODO: Implement buildOptions() method.
 
 		return $options;
@@ -27,7 +27,7 @@ class FlatMenuExtension implements ExtensionInterface {
 	 * @param ItemInterface $item
 	 * @param array $options
 	 */
-	public function buildItem(ItemInterface $item, array $options) {
+	public function buildItem(ItemInterface $item, array $options): void {
 		// Set extra parameters
 
 		$params = ['icon', 'rate_rights', 'headline', 'hide_navbar', 'badge', 'rate_alt_uri', 'user_rights'];

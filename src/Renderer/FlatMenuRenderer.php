@@ -44,7 +44,7 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		parent::__construct($charset);
 	}
 
-	public function render(ItemInterface $item, array $options = array()) {
+	public function render(ItemInterface $item, array $options = array()): string {
 		$options = array_merge($this->defaultOptions, $options);
 
 		$html = $this->renderList($item, $item->getChildrenAttributes(), $options);
@@ -56,11 +56,11 @@ class FlatMenuRenderer extends Renderer implements RendererInterface {
 		return $html;
 	}
 
-	public function renderBacklink(ItemInterface $item, $options = array()) {
+	public function renderBacklink(ItemInterface $item, $options = array()): string {
 		$options = array_merge($this->defaultOptions, $options);
 
 		if (empty($options['headline'])) {
-			return null;
+			return '';
 		}
 
 		if (!empty($options['label'])) {
